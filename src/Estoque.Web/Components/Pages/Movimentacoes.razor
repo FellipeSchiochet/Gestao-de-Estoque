@@ -1,0 +1,168 @@
+@page "/movimentacoes"
+@rendermode InteractiveServer
+@inject IProdutoApiService ProdutoApiService
+@inject IMovimentacaoApiService MovimentacaoApiService
+@inject ITokenStorageService TokenStorageService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+<PageTitle>Movimentacoes</PageTitle>
+
+<div class="page-stack">
+    <div class="page-header">
+        <div>
+            <MudText Typo="Typo.h4">Registrar movimentacao</MudText>
+            <MudText Typo="Typo.body2" Class="page-header__subtext">
+                Tela exclusiva para entradas e saidas do estoque.
+            </MudText>
+        </div>
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Default"
+                   Href="@HistoricoUrl">
+            Ver historico
+        </MudButton>
+    </div>
+
+    <MudPaper Class="panel form-panel">
+        <EditForm Model="_formModel" OnValidSubmit="RegistrarAsync">
+            <DataAnnotationsValidator />
+
+            <MudGrid Spacing="3">
+                <MudItem xs="12" md="6">
+                    <MudSelect T="int"
+                               Label="Produto"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               @bind-Value="_formModel.ProdutoId">
+                        @foreach (var produto in _produtos)
+                        {
+                            <MudSelectItem Value="@produto.Id">@produto.Nome</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" md="3">
+                    <MudSelect T="TipoMovimentacaoEstoqueViewModel"
+                               Label="Tipo"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               @bind-Value="_formModel.Tipo">
+                        <MudSelectItem Value="@TipoMovimentacaoEstoqueViewModel.Entrada">Entrada</MudSelectItem>
+                        <MudSelectItem Value="@TipoMovimentacaoEstoqueViewModel.Saida">Saida</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" md="3">
+                    <MudNumericField T="int"
+                                     @bind-Value="_formModel.Quantidade"
+                                     Label="Quantidade"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     Min="1"
+                                     Immediate="true" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_formModel.Observacao"
+                                  Label="Observacao"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Lines="4" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <ValidationSummary />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudStack Row="true" Spacing="2">
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Disabled="@_salvando">
+                            @(_salvando ? "Registrando..." : "Registrar")
+                        </MudButton>
+                        <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="LimparFormulario">
+                            Limpar
+                        </MudButton>
+                    </MudStack>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </MudPaper>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public int? ProdutoId { get; set; }
+
+    private IReadOnlyList<ProdutoViewModel> _produtos = [];
+    private MovimentacaoFormModel _formModel = new();
+    private bool _carregadoInicialmente;
+    private bool _salvando;
+
+    private string HistoricoUrl => _formModel.ProdutoId > 0
+        ? $"/movimentacoes/historico?produtoId={_formModel.ProdutoId}"
+        : "/movimentacoes/historico";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _carregadoInicialmente)
+        {
+            return;
+        }
+
+        _carregadoInicialmente = true;
+
+        var token = await TokenStorageService.ObterTokenAsync();
+
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            Snackbar.Add("Faca login para acessar as movimentacoes.", Severity.Warning);
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        _produtos = await ProdutoApiService.ObterTodosAsync(token);
+
+        if (ProdutoId.HasValue)
+        {
+            _formModel.ProdutoId = ProdutoId.Value;
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task RegistrarAsync()
+    {
+        _salvando = true;
+
+        try
+        {
+            var token = await TokenStorageService.ObterTokenAsync();
+            await MovimentacaoApiService.RegistrarAsync(token, _formModel);
+            Snackbar.Add("Movimentacao registrada com sucesso.", Severity.Success);
+            NavigationManager.NavigateTo($"/movimentacoes/historico?produtoId={_formModel.ProdutoId}");
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            Snackbar.Add("Movimentacao invalida. Verifique quantidade e saldo disponivel.", Severity.Warning);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _salvando = false;
+        }
+    }
+
+    private void LimparFormulario()
+    {
+        _formModel = new MovimentacaoFormModel
+        {
+            Tipo = TipoMovimentacaoEstoqueViewModel.Entrada
+        };
+    }
+}

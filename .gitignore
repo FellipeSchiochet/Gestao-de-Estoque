@@ -1,0 +1,11 @@
+.dotnet/
+.nuget/
+.logs/
+bin/
+obj/
+src/*/bin/
+src/*/obj/
+.vs/
+*.user
+*.DS_Store
+thumbs.db

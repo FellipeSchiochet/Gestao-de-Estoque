@@ -1,0 +1,155 @@
+@page "/movimentacoes/historico"
+@rendermode InteractiveServer
+@inject IProdutoApiService ProdutoApiService
+@inject IMovimentacaoApiService MovimentacaoApiService
+@inject ITokenStorageService TokenStorageService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+<PageTitle>Historico de Movimentacoes</PageTitle>
+
+<div class="page-stack">
+    <div class="page-header">
+        <div>
+            <MudText Typo="Typo.h4">Historico de movimentacoes</MudText>
+            <MudText Typo="Typo.body2" Class="page-header__subtext">
+                Tela dedicada para consulta do historico por produto.
+            </MudText>
+        </div>
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Default"
+                   Href="@MovimentacaoUrl">
+            Nova movimentacao
+        </MudButton>
+    </div>
+
+    <MudPaper Class="panel">
+        <div class="table-toolbar">
+            <MudSelect T="int"
+                       Label="Produto"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       @bind-Value="_produtoIdSelecionado"
+                       Class="table-toolbar__search">
+                @foreach (var produto in _produtos)
+                {
+                    <MudSelectItem Value="@produto.Id">@produto.Nome</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Default"
+                       OnClick="CarregarHistoricoAsync"
+                       Disabled="@(_produtoIdSelecionado <= 0 || _carregandoHistorico)">
+                Atualizar
+            </MudButton>
+        </div>
+
+        <MudDataGrid T="MovimentacaoViewModel"
+                     Items="@_historico"
+                     Loading="@_carregandoHistorico"
+                     Dense="false"
+                     Hover="true"
+                     Striped="true"
+                     RowsPerPage="8"
+                     Class="clean-grid">
+            <Columns>
+                <PropertyColumn Property="x => x.Data" Title="Data" Format="dd/MM/yyyy HH:mm" />
+                <TemplateColumn Title="Tipo">
+                    <CellTemplate>
+                        <MudChip T="string"
+                                 Value="@context.Item.Tipo.ToString()"
+                                 Variant="Variant.Outlined"
+                                 Color="@(context.Item.Tipo == TipoMovimentacaoEstoqueViewModel.Saida ? Color.Warning : Color.Success)"
+                                 Size="Size.Small">
+                            @context.Item.Tipo
+                        </MudChip>
+                    </CellTemplate>
+                </TemplateColumn>
+                <PropertyColumn Property="x => x.Quantidade" Title="Quantidade" />
+                <PropertyColumn Property="x => x.EstoqueAtual" Title="Saldo apos" />
+                <PropertyColumn Property="x => x.Observacao" Title="Observacao" />
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="MovimentacaoViewModel" />
+            </PagerContent>
+            <NoRecordsContent>
+                <div class="empty-state">
+                    <MudIcon Icon="@Icons.Material.Filled.Timeline" Size="Size.Large" />
+                    <MudText Typo="Typo.h6">Nenhuma movimentacao encontrada</MudText>
+                    <MudText Typo="Typo.body2">Selecione um produto para consultar o historico.</MudText>
+                </div>
+            </NoRecordsContent>
+        </MudDataGrid>
+    </MudPaper>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public int? ProdutoId { get; set; }
+
+    private IReadOnlyList<ProdutoViewModel> _produtos = [];
+    private IReadOnlyList<MovimentacaoViewModel> _historico = [];
+    private bool _carregadoInicialmente;
+    private bool _carregandoHistorico;
+    private int _produtoIdSelecionado;
+
+    private string MovimentacaoUrl => _produtoIdSelecionado > 0
+        ? $"/movimentacoes?produtoId={_produtoIdSelecionado}"
+        : "/movimentacoes";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _carregadoInicialmente)
+        {
+            return;
+        }
+
+        _carregadoInicialmente = true;
+
+        var token = await TokenStorageService.ObterTokenAsync();
+
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            Snackbar.Add("Faca login para acessar o historico.", Severity.Warning);
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        _produtos = await ProdutoApiService.ObterTodosAsync(token);
+        _produtoIdSelecionado = ProdutoId ?? 0;
+
+        if (_produtoIdSelecionado > 0)
+        {
+            await CarregarHistoricoAsync();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task CarregarHistoricoAsync()
+    {
+        if (_produtoIdSelecionado <= 0)
+        {
+            _historico = [];
+            return;
+        }
+
+        _carregandoHistorico = true;
+
+        try
+        {
+            var token = await TokenStorageService.ObterTokenAsync();
+            _historico = await MovimentacaoApiService.ObterHistoricoAsync(token, _produtoIdSelecionado);
+        }
+        catch (Exception ex)
+        {
+            _historico = [];
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _carregandoHistorico = false;
+        }
+    }
+}

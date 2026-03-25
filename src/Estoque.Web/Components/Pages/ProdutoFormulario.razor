@@ -1,0 +1,213 @@
+@page "/produtos/novo"
+@page "/produtos/editar/{Id:int}"
+@rendermode InteractiveServer
+@inject IProdutoApiService ProdutoApiService
+@inject ITokenStorageService TokenStorageService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+<PageTitle>@(_id.HasValue ? "Editar Produto" : "Novo Produto")</PageTitle>
+
+<div class="page-stack">
+    <div class="page-header">
+        <div>
+            <MudText Typo="Typo.h4">@(_id.HasValue ? "Editar produto" : "Novo produto")</MudText>
+            <MudText Typo="Typo.body2" Class="page-header__subtext">
+                Dados do item em uma tela dedicada, sem informacoes paralelas.
+            </MudText>
+        </div>
+        <MudButton Variant="Variant.Outlined" Color="Color.Default" Href="/produtos">
+            Voltar para produtos
+        </MudButton>
+    </div>
+
+    <MudPaper Class="panel form-panel">
+        @if (_carregando)
+        {
+            <div class="loading-block">
+                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            </div>
+        }
+        else
+        {
+            <EditForm Model="_formModel" OnValidSubmit="SalvarAsync">
+                <DataAnnotationsValidator />
+
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" md="8">
+                        <MudTextField @bind-Value="_formModel.Nome"
+                                      Label="Nome do produto"
+                                      Placeholder="Ex.: Teclado mecanico"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      For="@(() => _formModel.Nome)" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="4">
+                        <MudNumericField T="decimal"
+                                         @bind-Value="_formModel.Preco"
+                                         Label="Preco"
+                                         Variant="Variant.Outlined"
+                                         Margin="Margin.Dense"
+                                         Min="0"
+                                         Immediate="true"
+                                         For="@(() => _formModel.Preco)" />
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_formModel.Descricao"
+                                      Label="Descricao"
+                                      Placeholder="Resumo comercial ou tecnico do item"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Lines="5"
+                                      For="@(() => _formModel.Descricao)" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="4">
+                        <MudNumericField T="int"
+                                         @bind-Value="_formModel.QuantidadeEmEstoque"
+                                         Label="Quantidade inicial"
+                                         Variant="Variant.Outlined"
+                                         Margin="Margin.Dense"
+                                         Min="0"
+                                         Immediate="true"
+                                         For="@(() => _formModel.QuantidadeEmEstoque)" />
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <ValidationSummary />
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudStack Row="true" Spacing="2">
+                            <MudButton ButtonType="ButtonType.Submit"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       Disabled="@_salvando">
+                                @(_salvando ? "Salvando..." : "Salvar produto")
+                            </MudButton>
+                            <MudButton Variant="Variant.Text" Color="Color.Default" Href="/produtos">
+                                Cancelar
+                            </MudButton>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </EditForm>
+        }
+    </MudPaper>
+</div>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private ProdutoFormModel _formModel = new();
+    private int? _id;
+    private bool _carregando;
+    private bool _salvando;
+    private bool _carregadoInicialmente;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _carregadoInicialmente)
+        {
+            return;
+        }
+
+        _carregadoInicialmente = true;
+        _id = Id;
+
+        var token = await TokenStorageService.ObterTokenAsync();
+
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            Snackbar.Add("Faca login para acessar esta tela.", Severity.Warning);
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        if (_id.HasValue)
+        {
+            await CarregarProdutoAsync(token, _id.Value);
+            StateHasChanged();
+        }
+    }
+
+    private async Task CarregarProdutoAsync(string token, int id)
+    {
+        _carregando = true;
+
+        try
+        {
+            var produto = await ProdutoApiService.ObterPorIdAsync(token, id);
+
+            if (produto is null)
+            {
+                Snackbar.Add("Produto nao encontrado.", Severity.Warning);
+                NavigationManager.NavigateTo("/produtos");
+                return;
+            }
+
+            _formModel = new ProdutoFormModel
+            {
+                Id = produto.Id,
+                Nome = produto.Nome,
+                Descricao = produto.Descricao,
+                Preco = produto.Preco,
+                QuantidadeEmEstoque = produto.QuantidadeEmEstoque
+            };
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+            NavigationManager.NavigateTo("/produtos");
+        }
+        finally
+        {
+            _carregando = false;
+        }
+    }
+
+    private async Task SalvarAsync()
+    {
+        _salvando = true;
+
+        try
+        {
+            var token = await TokenStorageService.ObterTokenAsync();
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                Snackbar.Add("Sua sessao expirou. Faca login novamente.", Severity.Warning);
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+
+            if (_formModel.Id.HasValue)
+            {
+                await ProdutoApiService.AtualizarAsync(token, _formModel);
+                Snackbar.Add("Produto atualizado com sucesso.", Severity.Success);
+            }
+            else
+            {
+                await ProdutoApiService.CriarAsync(token, _formModel);
+                Snackbar.Add("Produto cadastrado com sucesso.", Severity.Success);
+            }
+
+            NavigationManager.NavigateTo("/produtos");
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            Snackbar.Add("Os dados informados sao invalidos.", Severity.Warning);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _salvando = false;
+        }
+    }
+}

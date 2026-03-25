@@ -1,0 +1,175 @@
+@page "/main"
+@rendermode InteractiveServer
+@inject ITokenStorageService TokenStorageService
+@inject IProdutoApiService ProdutoApiService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<PageTitle>Main</PageTitle>
+
+<div class="page-stack">
+    <MudPaper Class="panel dashboard-hero">
+        <MudGrid Spacing="2">
+            <MudItem xs="12" lg="8">
+                <MudText Typo="Typo.overline" Class="panel__eyebrow">Visao geral</MudText>
+                <MudText Typo="Typo.h4">Area principal do sistema</MudText>
+                <MudText Typo="Typo.body2" Class="panel__subtext">
+                    Use esta tela como ponto de entrada para acompanhar o estoque e acessar as funcoes principais.
+                </MudText>
+            </MudItem>
+            <MudItem xs="12" lg="4">
+                <div class="dashboard-hero__actions">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/produtos">
+                        Abrir produtos
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Default" Href="/movimentacoes">
+                        Nova movimentacao
+                    </MudButton>
+                </div>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <MudGrid Spacing="2">
+        <MudItem xs="12" sm="6" lg="3">
+            <MudPaper Class="mini-stat-card">
+                <span>Total de produtos</span>
+                <strong>@_totalProdutos</strong>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" lg="3">
+            <MudPaper Class="mini-stat-card">
+                <span>Itens em estoque</span>
+                <strong>@_itensEmEstoque</strong>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" lg="3">
+            <MudPaper Class="mini-stat-card">
+                <span>Valor estimado</span>
+                <strong>@_valorTotalEstoque.ToString("C")</strong>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" lg="3">
+            <MudPaper Class="mini-stat-card">
+                <span>Estoque baixo</span>
+                <strong>@_produtosComEstoqueBaixo</strong>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <MudGrid Spacing="2">
+        <MudItem xs="12" lg="8">
+            <MudPaper Class="panel">
+                <MudText Typo="Typo.h6">Prioridades do dia</MudText>
+                <MudText Typo="Typo.body2" Class="panel__subtext">
+                    Resumo rapido para orientar o trabalho operacional.
+                </MudText>
+
+                <div class="priority-list mt-4">
+                    <div class="priority-item">
+                        <div>
+                            <strong>Reposicao recomendada</strong>
+                            <p>@_produtosComEstoqueBaixo produto(s) com 5 unidades ou menos.</p>
+                        </div>
+                        <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/produtos">
+                            Ver produtos
+                        </MudButton>
+                    </div>
+
+                    <div class="priority-item">
+                        <div>
+                            <strong>Cadastro rapido</strong>
+                            <p>Adicione novos itens ao catalogo quando houver entrada de linha.</p>
+                        </div>
+                        <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/produtos/novo">
+                            Novo produto
+                        </MudButton>
+                    </div>
+
+                    <div class="priority-item">
+                        <div>
+                            <strong>Atualizacao de saldo</strong>
+                            <p>Registre entradas e saidas para manter o estoque coerente.</p>
+                        </div>
+                        <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/movimentacoes">
+                            Movimentar
+                        </MudButton>
+                    </div>
+                </div>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" lg="4">
+            <MudPaper Class="panel">
+                <MudText Typo="Typo.h6">Atalhos</MudText>
+                <MudText Typo="Typo.body2" Class="panel__subtext">
+                    Acesso direto as funcoes mais usadas.
+                </MudText>
+
+                <div class="shortcut-list mt-4">
+                    <a class="shortcut-link" href="/produtos">
+                        <MudIcon Icon="@Icons.Material.Filled.Inventory2" Color="Color.Primary" />
+                        <span>Produtos</span>
+                    </a>
+                    <a class="shortcut-link" href="/produtos/novo">
+                        <MudIcon Icon="@Icons.Material.Filled.AddBox" Color="Color.Primary" />
+                        <span>Novo produto</span>
+                    </a>
+                    <a class="shortcut-link" href="/movimentacoes">
+                        <MudIcon Icon="@Icons.Material.Filled.SwapHoriz" Color="Color.Primary" />
+                        <span>Movimentacoes</span>
+                    </a>
+                    <a class="shortcut-link" href="/movimentacoes/historico">
+                        <MudIcon Icon="@Icons.Material.Filled.Timeline" Color="Color.Primary" />
+                        <span>Historico</span>
+                    </a>
+                </div>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</div>
+
+@code {
+    private bool _carregadoInicialmente;
+    private int _totalProdutos;
+    private int _itensEmEstoque;
+    private int _produtosComEstoqueBaixo;
+    private decimal _valorTotalEstoque;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _carregadoInicialmente)
+        {
+            return;
+        }
+
+        _carregadoInicialmente = true;
+        await CarregarResumoAsync();
+        StateHasChanged();
+    }
+
+    private async Task CarregarResumoAsync()
+    {
+        try
+        {
+            var token = await TokenStorageService.ObterTokenAsync();
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+
+            var produtos = await ProdutoApiService.ObterTodosAsync(token);
+
+            _totalProdutos = produtos.Count;
+            _itensEmEstoque = produtos.Sum(x => x.QuantidadeEmEstoque);
+            _valorTotalEstoque = produtos.Sum(x => x.Preco * x.QuantidadeEmEstoque);
+            _produtosComEstoqueBaixo = produtos.Count(x => x.QuantidadeEmEstoque <= 5);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+}

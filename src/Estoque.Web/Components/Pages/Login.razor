@@ -1,0 +1,231 @@
+@page "/login"
+@layout AuthLayout
+@rendermode InteractiveServer
+@inject IAuthApiService AuthApiService
+@inject ITokenStorageService TokenStorageService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+<PageTitle>Acesso</PageTitle>
+
+<div class="login-page">
+    <MudGrid Spacing="3">
+        <MudItem xs="12" md="7" lg="8">
+            <MudPaper Class="panel panel--dark login-intro">
+                <MudText Typo="Typo.overline" Class="panel__eyebrow panel__eyebrow--light">Estoque Central</MudText>
+                <MudText Typo="Typo.h3" Class="login-intro__title">
+                    Um painel limpo para operar produtos, usuarios e saldo sem atrito.
+                </MudText>
+                <MudText Typo="Typo.body1" Class="login-intro__copy">
+                    Entre com sua conta ou crie um novo acesso para usar o sistema direto pelo frontend.
+                </MudText>
+
+                <MudGrid Spacing="2" Class="login-intro__grid">
+                    <MudItem xs="12" sm="4">
+                        <div class="mini-stat mini-stat--dark">
+                            <span>Catalogo</span>
+                            <strong>Produtos</strong>
+                        </div>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <div class="mini-stat mini-stat--dark">
+                            <span>Operacao</span>
+                            <strong>Movimentacoes</strong>
+                        </div>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <div class="mini-stat mini-stat--dark">
+                            <span>Acesso</span>
+                            <strong>Cadastro</strong>
+                        </div>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="5" lg="4">
+            <MudPaper Class="panel login-card">
+                <MudText Typo="Typo.overline" Class="panel__eyebrow">Acesso</MudText>
+                <MudText Typo="Typo.h4">@(_modoCadastro ? "Criar conta" : "Entrar")</MudText>
+                <MudText Typo="Typo.body2" Class="panel__subtext">
+                    @(_modoCadastro
+                        ? "Cadastre um usuario novo e entre automaticamente no sistema."
+                        : "Use seu e-mail e senha para acessar o sistema.")
+                </MudText>
+
+                <MudStack Row="true" Spacing="1" Class="access-toggle">
+                    <MudButton Variant="@(_modoCadastro ? Variant.Text : Variant.Filled)"
+                               Color="Color.Primary"
+                               OnClick="() => AlternarModo(false)">
+                        Entrar
+                    </MudButton>
+                    <MudButton Variant="@(_modoCadastro ? Variant.Filled : Variant.Text)"
+                               Color="Color.Primary"
+                               OnClick="() => AlternarModo(true)">
+                        Cadastrar
+                    </MudButton>
+                </MudStack>
+
+                @if (_modoCadastro)
+                {
+                    <EditForm Model="_registerModel" OnValidSubmit="CadastrarAsync">
+                        <DataAnnotationsValidator />
+
+                        <MudStack Spacing="2" Class="mt-6">
+                            <MudTextField @bind-Value="_registerModel.Nome"
+                                          Label="Nome"
+                                          Placeholder="Seu nome"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Person"
+                                          For="@(() => _registerModel.Nome)" />
+
+                            <MudTextField @bind-Value="_registerModel.Email"
+                                          Label="E-mail"
+                                          Placeholder="voce@empresa.com"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.AlternateEmail"
+                                          For="@(() => _registerModel.Email)" />
+
+                            <MudTextField @bind-Value="_registerModel.Senha"
+                                          Label="Senha"
+                                          Placeholder="Crie uma senha"
+                                          InputType="InputType.Password"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Lock"
+                                          For="@(() => _registerModel.Senha)" />
+
+                            <MudTextField @bind-Value="_registerModel.ConfirmacaoSenha"
+                                          Label="Confirmar senha"
+                                          Placeholder="Repita a senha"
+                                          InputType="InputType.Password"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.LockReset"
+                                          For="@(() => _registerModel.ConfirmacaoSenha)" />
+
+                            <ValidationSummary />
+
+                            <MudButton ButtonType="ButtonType.Submit"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       FullWidth="true"
+                                       Disabled="@_processando"
+                                       Class="login-card__submit">
+                                @(_processando ? "Cadastrando..." : "Criar conta")
+                            </MudButton>
+                        </MudStack>
+                    </EditForm>
+                }
+                else
+                {
+                    <EditForm Model="_loginModel" OnValidSubmit="EntrarAsync">
+                        <DataAnnotationsValidator />
+
+                        <MudStack Spacing="2" Class="mt-6">
+                            <MudTextField @bind-Value="_loginModel.Email"
+                                          Label="E-mail"
+                                          Placeholder="voce@empresa.com"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.AlternateEmail"
+                                          For="@(() => _loginModel.Email)" />
+
+                            <MudTextField @bind-Value="_loginModel.Senha"
+                                          Label="Senha"
+                                          Placeholder="Digite sua senha"
+                                          InputType="InputType.Password"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Lock"
+                                          For="@(() => _loginModel.Senha)" />
+
+                            <ValidationSummary />
+
+                            <MudButton ButtonType="ButtonType.Submit"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       FullWidth="true"
+                                       Disabled="@_processando"
+                                       Class="login-card__submit">
+                                @(_processando ? "Entrando..." : "Entrar no sistema")
+                            </MudButton>
+                        </MudStack>
+                    </EditForm>
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</div>
+
+@code {
+    private readonly LoginFormModel _loginModel = new();
+    private readonly RegisterFormModel _registerModel = new();
+    private bool _modoCadastro;
+    private bool _processando;
+
+    private void AlternarModo(bool cadastro)
+    {
+        _modoCadastro = cadastro;
+    }
+
+    private async Task EntrarAsync()
+    {
+        _processando = true;
+
+        try
+        {
+            var auth = await AuthApiService.LoginAsync(_loginModel);
+            await TokenStorageService.SalvarTokenAsync(auth.Token);
+
+            Snackbar.Add($"Bem-vindo, {auth.Usuario.Nome}.", Severity.Success);
+            NavigationManager.NavigateTo("/main");
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            Snackbar.Add("E-mail ou senha invalidos.", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _processando = false;
+        }
+    }
+
+    private async Task CadastrarAsync()
+    {
+        _processando = true;
+
+        try
+        {
+            var auth = await AuthApiService.RegisterAsync(_registerModel);
+            await TokenStorageService.SalvarTokenAsync(auth.Token);
+
+            Snackbar.Add("Conta criada com sucesso.", Severity.Success);
+            NavigationManager.NavigateTo("/main");
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            Snackbar.Add("Nao foi possivel criar a conta. Verifique os dados informados.", Severity.Warning);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _processando = false;
+        }
+    }
+}

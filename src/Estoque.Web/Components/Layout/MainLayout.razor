@@ -1,0 +1,101 @@
+@inherits LayoutComponentBase
+@inject ITokenStorageService TokenStorageService
+@inject NavigationManager NavigationManager
+
+<MudThemeProvider Theme="_theme" />
+<MudDialogProvider />
+<MudPopoverProvider />
+<MudSnackbarProvider />
+
+<MudLayout Class="app-shell">
+    <MudDrawer @bind-Open="_drawerOpen"
+               Variant="DrawerVariant.Responsive"
+               Breakpoint="Breakpoint.Md"
+               Elevation="0"
+               Class="app-drawer">
+        <div class="app-drawer__brand">
+            <div class="app-drawer__logo">EC</div>
+            <div>
+                <MudText Typo="Typo.subtitle2" Class="app-drawer__eyebrow">Sistema</MudText>
+                <MudText Typo="Typo.h6" Class="app-drawer__title">Estoque Central</MudText>
+            </div>
+        </div>
+
+        <MudNavMenu Class="app-nav">
+            <MudNavLink Href="/main" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
+                Main
+            </MudNavLink>
+            <MudNavLink Href="/produtos" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Inventory2">
+                Produtos
+            </MudNavLink>
+            <MudNavLink Href="/produtos/novo" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AddBox">
+                Novo produto
+            </MudNavLink>
+            <MudNavLink Href="/movimentacoes" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.SwapHoriz">
+                Movimentacoes
+            </MudNavLink>
+            <MudNavLink Href="/movimentacoes/historico" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Timeline">
+                Historico
+            </MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent>
+        <div class="app-topbar">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" OnClick="ToggleDrawer" />
+            <div class="app-topbar__titles">
+                <MudText Typo="Typo.subtitle2">Painel operacional</MudText>
+                <MudText Typo="Typo.body2">Controle de estoque e movimentacoes</MudText>
+            </div>
+            <MudSpacer />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SairAsync">Sair</MudButton>
+        </div>
+
+        <MudContainer MaxWidth="MaxWidth.False" Class="app-content">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private bool _drawerOpen = true;
+
+    private readonly MudTheme _theme = new()
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#0F3D75",
+            Secondary = "#2563EB",
+            Background = "#F5F7FB",
+            Surface = "#FFFFFF",
+            AppbarBackground = "#FFFFFF",
+            AppbarText = "#172033",
+            DrawerBackground = "#FFFFFF",
+            DrawerText = "#172033",
+            DrawerIcon = "#66758F",
+            Success = "#15803D",
+            Warning = "#D97706",
+            Error = "#C62828",
+            Info = "#2563EB",
+            TextPrimary = "#172033",
+            TextSecondary = "#66758F",
+            LinesDefault = "#E6EBF2",
+            TableStriped = "#FAFBFD"
+        },
+        LayoutProperties = new LayoutProperties
+        {
+            DefaultBorderRadius = "14px"
+        }
+    };
+
+    private void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private async Task SairAsync()
+    {
+        await TokenStorageService.RemoverTokenAsync();
+        NavigationManager.NavigateTo("/login");
+    }
+}

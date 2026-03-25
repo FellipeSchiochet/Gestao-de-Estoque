@@ -1,0 +1,213 @@
+@page "/produtos"
+@rendermode InteractiveServer
+@inject IProdutoApiService ProdutoApiService
+@inject ITokenStorageService TokenStorageService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+<PageTitle>Produtos</PageTitle>
+
+<div class="page-stack">
+    <div class="page-header">
+        <div>
+            <MudText Typo="Typo.h4">Produtos</MudText>
+            <MudText Typo="Typo.body2" Class="page-header__subtext">
+                Catalogo principal do estoque com busca, saldo e acoes operacionais.
+            </MudText>
+        </div>
+        <MudStack Row="true" Spacing="2" Class="page-header__actions">
+            <MudButton Variant="Variant.Outlined" Color="Color.Default" Disabled="@_carregando" OnClick="CarregarProdutosAsync">
+                Atualizar
+            </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/produtos/novo">
+                Novo produto
+            </MudButton>
+        </MudStack>
+    </div>
+
+    <MudGrid Spacing="2">
+        <MudItem xs="12" sm="6" lg="3">
+            <MudPaper Class="mini-stat-card">
+                <span>Total de produtos</span>
+                <strong>@TotalProdutos</strong>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" lg="3">
+            <MudPaper Class="mini-stat-card">
+                <span>Itens em estoque</span>
+                <strong>@ItensEmEstoque</strong>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" lg="3">
+            <MudPaper Class="mini-stat-card">
+                <span>Valor estimado</span>
+                <strong>@ValorTotalEstoque.ToString("C")</strong>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" lg="3">
+            <MudPaper Class="mini-stat-card">
+                <span>Estoque baixo</span>
+                <strong>@ProdutosComEstoqueBaixo</strong>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <MudPaper Class="panel">
+        <div class="table-toolbar">
+            <MudTextField @bind-Value="_filtro"
+                          Label="Buscar produto"
+                          Placeholder="Nome ou descricao"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Immediate="true"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Class="table-toolbar__search" />
+        </div>
+
+        <MudDataGrid T="ProdutoViewModel"
+                     Items="@_produtos"
+                     Loading="@_carregando"
+                     QuickFilter="FiltrarProdutos"
+                     SortMode="SortMode.Multiple"
+                     Filterable="false"
+                     Dense="false"
+                     Hover="true"
+                     Striped="true"
+                     RowsPerPage="10"
+                     Class="clean-grid">
+            <Columns>
+                <PropertyColumn Property="x => x.Id" Title="Id" />
+                <PropertyColumn Property="x => x.Nome" Title="Nome" />
+                <PropertyColumn Property="x => x.Descricao" Title="Descricao" />
+                <PropertyColumn Property="x => x.Preco" Title="Preco" Format="C" />
+                <TemplateColumn Title="Estoque" Sortable="true">
+                    <CellTemplate>
+                        <MudChip T="int"
+                                 Value="context.Item.QuantidadeEmEstoque"
+                                 Variant="Variant.Outlined"
+                                 Color="@(context.Item.QuantidadeEmEstoque <= 5 ? Color.Warning : Color.Success)"
+                                 Size="Size.Small">
+                            @context.Item.QuantidadeEmEstoque un.
+                        </MudChip>
+                    </CellTemplate>
+                </TemplateColumn>
+                <PropertyColumn Property="x => x.DataCadastro" Title="Cadastro" Format="dd/MM/yyyy HH:mm" />
+                <TemplateColumn Title="Acoes" Sortable="false" Filterable="false">
+                    <CellTemplate>
+                        <MudStack Row="true" Spacing="1">
+                            <MudIconButton Icon="@Icons.Material.Filled.SwapHoriz"
+                                           Color="Color.Default"
+                                           Variant="Variant.Outlined"
+                                           Size="Size.Small"
+                                           Href="@($"/movimentacoes?produtoId={context.Item.Id}")" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                           Color="Color.Primary"
+                                           Variant="Variant.Outlined"
+                                           Size="Size.Small"
+                                           Href="@($"/produtos/editar/{context.Item.Id}")" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           Variant="Variant.Outlined"
+                                           Size="Size.Small"
+                                           OnClick="@(() => RemoverProdutoAsync(context.Item))" />
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="ProdutoViewModel" />
+            </PagerContent>
+            <NoRecordsContent>
+                <div class="empty-state">
+                    <MudIcon Icon="@Icons.Material.Filled.Inventory2" Size="Size.Large" />
+                    <MudText Typo="Typo.h6">Nenhum produto encontrado</MudText>
+                    <MudText Typo="Typo.body2">Ajuste o filtro ou cadastre um novo item.</MudText>
+                </div>
+            </NoRecordsContent>
+        </MudDataGrid>
+    </MudPaper>
+</div>
+
+@code {
+    private IReadOnlyList<ProdutoViewModel> _produtos = [];
+    private string _filtro = string.Empty;
+    private bool _carregando;
+    private bool _carregadoInicialmente;
+
+    private int TotalProdutos => _produtos.Count;
+    private int ItensEmEstoque => _produtos.Sum(produto => produto.QuantidadeEmEstoque);
+    private decimal ValorTotalEstoque => _produtos.Sum(produto => produto.Preco * produto.QuantidadeEmEstoque);
+    private int ProdutosComEstoqueBaixo => _produtos.Count(produto => produto.QuantidadeEmEstoque <= 5);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _carregadoInicialmente)
+        {
+            return;
+        }
+
+        _carregadoInicialmente = true;
+        await CarregarProdutosAsync();
+        StateHasChanged();
+    }
+
+    private bool FiltrarProdutos(ProdutoViewModel produto)
+    {
+        if (string.IsNullOrWhiteSpace(_filtro))
+        {
+            return true;
+        }
+
+        return produto.Nome.Contains(_filtro, StringComparison.OrdinalIgnoreCase)
+            || (produto.Descricao?.Contains(_filtro, StringComparison.OrdinalIgnoreCase) ?? false);
+    }
+
+    private async Task CarregarProdutosAsync()
+    {
+        _carregando = true;
+
+        try
+        {
+            var token = await TokenStorageService.ObterTokenAsync();
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                Snackbar.Add("Faca login para acessar os produtos.", Severity.Warning);
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+
+            _produtos = await ProdutoApiService.ObterTodosAsync(token);
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            Snackbar.Add("Sua sessao expirou. Faca login novamente.", Severity.Warning);
+            NavigationManager.NavigateTo("/login");
+        }
+        catch (Exception ex)
+        {
+            _produtos = [];
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _carregando = false;
+        }
+    }
+
+    private async Task RemoverProdutoAsync(ProdutoViewModel produto)
+    {
+        try
+        {
+            var token = await TokenStorageService.ObterTokenAsync();
+            await ProdutoApiService.RemoverAsync(token, produto.Id);
+            Snackbar.Add("Produto removido com sucesso.", Severity.Success);
+            await CarregarProdutosAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+}

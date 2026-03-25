@@ -1,0 +1,75 @@
+html, body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fb;
+    color: #1d2433;
+}
+
+h1:focus {
+    outline: none;
+}
+
+#app {
+    min-height: 100vh;
+}
+
+.mud-main-content {
+    background:
+        radial-gradient(circle at top left, rgba(21, 101, 192, 0.08), transparent 28%),
+        linear-gradient(180deg, #f8fbff 0%, #f4f6fa 100%);
+    min-height: 100vh;
+}
+
+#blazor-error-ui {
+    color-scheme: light only;
+    background: #fff4d6;
+    bottom: 0;
+    box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.15);
+    box-sizing: border-box;
+    display: none;
+    left: 0;
+    padding: 0.75rem 1rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+.loading-progress {
+    position: absolute;
+    display: block;
+    width: 8rem;
+    height: 8rem;
+    inset: 20vh 0 auto 0;
+    margin: 0 auto;
+}
+
+.loading-progress circle {
+    fill: none;
+    stroke: #d5deeb;
+    stroke-width: 0.6rem;
+    transform-origin: 50% 50%;
+    transform: rotate(-90deg);
+}
+
+.loading-progress circle:last-child {
+    stroke: #1565c0;
+    stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
+    transition: stroke-dasharray 0.05s ease-in-out;
+}
+
+.loading-progress-text {
+    position: absolute;
+    text-align: center;
+    font-weight: 600;
+    inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
+}
+
+.loading-progress-text:after {
+    content: var(--blazor-load-percentage-text, "Carregando");
+}
