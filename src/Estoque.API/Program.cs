@@ -17,8 +17,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.AddFilter<EventLogLoggerProvider>(level => level >= LogLevel.None);
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException("ConnectionString 'DefaultConnection' não configurada. Defina o valor em variáveis de ambiente/User Secrets.");
+}
+
 builder.Services.AddDbContext<EstoqueDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IMovimentacaoEstoqueRepository, MovimentacaoEstoqueRepository>();
