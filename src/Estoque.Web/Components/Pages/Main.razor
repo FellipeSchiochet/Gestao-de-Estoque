@@ -7,70 +7,30 @@
 
 <PageTitle>Main</PageTitle>
 
-<div class="page-stack dashboard-page">
-    <MudPaper Class="panel dashboard-hero">
-        <MudGrid Spacing="3">
-            <MudItem xs="12" lg="7">
-                <div class="dashboard-hero__main">
-                    <MudText Typo="Typo.overline" Class="panel__eyebrow">Visao geral</MudText>
-                    <MudText Typo="Typo.h3" Class="dashboard-hero__title">Seu painel de estoque, agora mais limpo e objetivo.</MudText>
-                    <MudText Typo="Typo.body1" Class="panel__subtext dashboard-hero__copy">
-                        Acompanhe os numeros principais, veja prioridades do dia e entre rapido nas rotinas mais usadas.
-                    </MudText>
+<div class="page-stack dashboard-page dashboard-page--clean">
+    <MudPaper Class="panel dashboard-hero dashboard-hero--clean">
+        <div class="dashboard-hero__main">
+            <MudText Typo="Typo.overline" Class="panel__eyebrow">Dashboard</MudText>
+            <MudText Typo="Typo.h3" Class="dashboard-hero__title">Resumo rapido do estoque.</MudText>
+            <MudText Typo="Typo.body1" Class="panel__subtext dashboard-hero__copy">
+                Veja os principais numeros e use os atalhos para entrar direto no que importa.
+            </MudText>
 
-                    <div class="dashboard-badge-list">
-                        <div class="dashboard-badge">
-                            <MudIcon Icon="@Icons.Material.Filled.Inventory2" Size="Size.Small" />
-                            <span>@_totalProdutos produto(s) cadastrados</span>
-                        </div>
-                        <div class="dashboard-badge">
-                            <MudIcon Icon="@Icons.Material.Filled.Warehouse" Size="Size.Small" />
-                            <span>@_itensEmEstoque item(ns) em estoque</span>
-                        </div>
-                        <div class="dashboard-badge dashboard-badge--alert">
-                            <MudIcon Icon="@Icons.Material.Filled.WarningAmber" Size="Size.Small" />
-                            <span>@StatusEstoque</span>
-                        </div>
-                    </div>
-
-                    <MudStack Row="true" Spacing="2" Class="dashboard-hero__actions">
-                        <MudButton Variant="Variant.Filled"
-                                   Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.Inventory2"
-                                   Href="/produtos">
-                            Abrir produtos
-                        </MudButton>
-                        <MudButton Variant="Variant.Outlined"
-                                   Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.SwapHoriz"
-                                   Href="/movimentacoes">
-                            Nova movimentacao
-                        </MudButton>
-                    </MudStack>
+            <div class="dashboard-summary">
+                <div class="dashboard-summary__item">
+                    <span>Status</span>
+                    <strong>@StatusEstoque</strong>
                 </div>
-            </MudItem>
-
-            <MudItem xs="12" lg="5">
-                <div class="dashboard-focus-card">
-                    <div class="dashboard-focus-card__item">
-                        <span class="dashboard-focus-card__label">Valor estimado</span>
-                        <strong class="dashboard-focus-card__value">@_valorTotalEstoque.ToString("C")</strong>
-                    </div>
-                    <div class="dashboard-focus-card__item">
-                        <span class="dashboard-focus-card__label">Ticket medio por produto</span>
-                        <strong class="dashboard-focus-card__value">@TicketMedioEstoque.ToString("C")</strong>
-                    </div>
-                    <div class="dashboard-focus-card__item dashboard-focus-card__item--accent">
-                        <span class="dashboard-focus-card__label">Leitura operacional</span>
-                        <strong class="dashboard-focus-card__value">@MensagemOperacional</strong>
-                    </div>
+                <div class="dashboard-summary__item">
+                    <span>Leitura</span>
+                    <strong>@MensagemOperacional</strong>
                 </div>
-            </MudItem>
-        </MudGrid>
+            </div>
+        </div>
     </MudPaper>
 
     <MudGrid Spacing="2" Class="stats-grid">
-        <MudItem xs="12" sm="6" lg="3">
+        <MudItem xs="12" sm="6" lg="4">
             <MudPaper Class="stat-card">
                 <div class="stat-card__icon">
                     <MudIcon Icon="@Icons.Material.Filled.Category" />
@@ -78,12 +38,12 @@
                 <div class="stat-card__body">
                     <span>Total de produtos</span>
                     <strong>@_totalProdutos</strong>
-                    <p>Base ativa cadastrada no sistema.</p>
+                    <p>Itens cadastrados no sistema.</p>
                 </div>
             </MudPaper>
         </MudItem>
 
-        <MudItem xs="12" sm="6" lg="3">
+        <MudItem xs="12" sm="6" lg="4">
             <MudPaper Class="stat-card">
                 <div class="stat-card__icon">
                     <MudIcon Icon="@Icons.Material.Filled.Inventory" />
@@ -91,25 +51,12 @@
                 <div class="stat-card__body">
                     <span>Itens em estoque</span>
                     <strong>@_itensEmEstoque</strong>
-                    <p>Quantidade somada entre todos os produtos.</p>
+                    <p>Quantidade total disponivel.</p>
                 </div>
             </MudPaper>
         </MudItem>
 
-        <MudItem xs="12" sm="6" lg="3">
-            <MudPaper Class="stat-card">
-                <div class="stat-card__icon">
-                    <MudIcon Icon="@Icons.Material.Filled.Payments" />
-                </div>
-                <div class="stat-card__body">
-                    <span>Valor estimado</span>
-                    <strong>@_valorTotalEstoque.ToString("C")</strong>
-                    <p>Potencial financeiro do estoque atual.</p>
-                </div>
-            </MudPaper>
-        </MudItem>
-
-        <MudItem xs="12" sm="6" lg="3">
+        <MudItem xs="12" sm="6" lg="4">
             <MudPaper Class="stat-card stat-card--warning">
                 <div class="stat-card__icon">
                     <MudIcon Icon="@Icons.Material.Filled.PriorityHigh" />
@@ -117,143 +64,53 @@
                 <div class="stat-card__body">
                     <span>Estoque baixo</span>
                     <strong>@_produtosComEstoqueBaixo</strong>
-                    <p>Itens com 5 unidades ou menos.</p>
+                    <p>Produtos com 5 unidades ou menos.</p>
                 </div>
             </MudPaper>
         </MudItem>
     </MudGrid>
 
-    <MudGrid Spacing="2">
-        <MudItem xs="12" lg="8">
-            <MudPaper Class="panel">
-                <div class="section-heading">
-                    <div>
-                        <MudText Typo="Typo.h5">Prioridades do dia</MudText>
-                        <MudText Typo="Typo.body2" Class="panel__subtext">
-                            Um resumo claro das acoes que mais impactam a operacao.
-                        </MudText>
-                    </div>
-                    <div class="section-heading__pill">@StatusEstoque</div>
-                </div>
-
-                <div class="priority-list">
-                    <div class="priority-item">
-                        <div class="priority-item__content">
-                            <div class="priority-item__icon">
-                                <MudIcon Icon="@Icons.Material.Filled.LocalShipping" />
-                            </div>
-                            <div>
-                                <strong>Reposicao recomendada</strong>
-                                <p>@_produtosComEstoqueBaixo produto(s) com 5 unidades ou menos precisam de revisao.</p>
-                            </div>
-                        </div>
-                        <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/produtos">
-                            Ver produtos
-                        </MudButton>
-                    </div>
-
-                    <div class="priority-item">
-                        <div class="priority-item__content">
-                            <div class="priority-item__icon">
-                                <MudIcon Icon="@Icons.Material.Filled.AddBusiness" />
-                            </div>
-                            <div>
-                                <strong>Cadastro rapido</strong>
-                                <p>Inclua novos itens no catalogo assim que chegarem ao estoque.</p>
-                            </div>
-                        </div>
-                        <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/produtos/novo">
-                            Novo produto
-                        </MudButton>
-                    </div>
-
-                    <div class="priority-item">
-                        <div class="priority-item__content">
-                            <div class="priority-item__icon">
-                                <MudIcon Icon="@Icons.Material.Filled.SyncAlt" />
-                            </div>
-                            <div>
-                                <strong>Atualizacao de saldo</strong>
-                                <p>Registre entradas e saidas para manter os numeros sempre confiaveis.</p>
-                            </div>
-                        </div>
-                        <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/movimentacoes">
-                            Movimentar
-                        </MudButton>
-                    </div>
-                </div>
-            </MudPaper>
-        </MudItem>
-
-        <MudItem xs="12" lg="4">
-            <div class="page-stack dashboard-side-stack">
-                <MudPaper Class="panel shortcut-card">
-                    <MudText Typo="Typo.h5">Atalhos</MudText>
-                    <MudText Typo="Typo.body2" Class="panel__subtext">
-                        Acesso direto para navegar sem perder tempo.
-                    </MudText>
-
-                    <div class="shortcut-list">
-                        <a class="shortcut-link" href="/produtos">
-                            <MudIcon Icon="@Icons.Material.Filled.Inventory2" Color="Color.Primary" />
-                            <div class="shortcut-link__content">
-                                <span>Produtos</span>
-                                <small>Catalogo completo</small>
-                            </div>
-                        </a>
-                        <a class="shortcut-link" href="/produtos/novo">
-                            <MudIcon Icon="@Icons.Material.Filled.AddBox" Color="Color.Primary" />
-                            <div class="shortcut-link__content">
-                                <span>Novo produto</span>
-                                <small>Cadastro rapido</small>
-                            </div>
-                        </a>
-                        <a class="shortcut-link" href="/movimentacoes">
-                            <MudIcon Icon="@Icons.Material.Filled.SwapHoriz" Color="Color.Primary" />
-                            <div class="shortcut-link__content">
-                                <span>Movimentacoes</span>
-                                <small>Entrada e saida</small>
-                            </div>
-                        </a>
-                        <a class="shortcut-link" href="/movimentacoes/historico">
-                            <MudIcon Icon="@Icons.Material.Filled.Timeline" Color="Color.Primary" />
-                            <div class="shortcut-link__content">
-                                <span>Historico</span>
-                                <small>Rastreamento operacional</small>
-                            </div>
-                        </a>
-                    </div>
-                </MudPaper>
-
-                <MudPaper Class="panel insight-panel">
-                    <MudText Typo="Typo.h6">Saude do estoque</MudText>
-                    <MudText Typo="Typo.body2" Class="panel__subtext">
-                        Leitura rapida para entender o momento da operacao.
-                    </MudText>
-
-                    <div class="insight-list">
-                        <div class="insight-row">
-                            <span>Produtos cadastrados</span>
-                            <strong>@_totalProdutos</strong>
-                        </div>
-                        <div class="insight-row">
-                            <span>Itens disponiveis</span>
-                            <strong>@_itensEmEstoque</strong>
-                        </div>
-                        <div class="insight-row">
-                            <span>Baixa prioridade</span>
-                            <strong>@_produtosComEstoqueBaixo</strong>
-                        </div>
-                    </div>
-
-                    <div class="insight-callout">
-                        <MudIcon Icon="@Icons.Material.Filled.Insights" />
-                        <p>@MensagemOperacional</p>
-                    </div>
-                </MudPaper>
+    <MudPaper Class="panel shortcut-card shortcut-card--dashboard">
+        <div class="section-heading section-heading--compact">
+            <div>
+                <MudText Typo="Typo.h5">Atalhos</MudText>
+                <MudText Typo="Typo.body2" Class="panel__subtext">
+                    Acesso direto para as acoes principais do sistema.
+                </MudText>
             </div>
-        </MudItem>
-    </MudGrid>
+        </div>
+
+        <div class="shortcut-list shortcut-list--dashboard">
+            <a class="shortcut-link" href="/produtos">
+                <MudIcon Icon="@Icons.Material.Filled.Inventory2" Color="Color.Primary" />
+                <div class="shortcut-link__content">
+                    <span>Produtos</span>
+                    <small>Ver catalogo completo</small>
+                </div>
+            </a>
+            <a class="shortcut-link" href="/produtos/novo">
+                <MudIcon Icon="@Icons.Material.Filled.AddBox" Color="Color.Primary" />
+                <div class="shortcut-link__content">
+                    <span>Novo produto</span>
+                    <small>Cadastrar item</small>
+                </div>
+            </a>
+            <a class="shortcut-link" href="/movimentacoes">
+                <MudIcon Icon="@Icons.Material.Filled.SwapHoriz" Color="Color.Primary" />
+                <div class="shortcut-link__content">
+                    <span>Movimentacoes</span>
+                    <small>Registrar entrada e saida</small>
+                </div>
+            </a>
+            <a class="shortcut-link" href="/movimentacoes/historico">
+                <MudIcon Icon="@Icons.Material.Filled.Timeline" Color="Color.Primary" />
+                <div class="shortcut-link__content">
+                    <span>Historico</span>
+                    <small>Consultar registros</small>
+                </div>
+            </a>
+        </div>
+    </MudPaper>
 </div>
 
 @code {
@@ -261,25 +118,20 @@
     private int _totalProdutos;
     private int _itensEmEstoque;
     private int _produtosComEstoqueBaixo;
-    private decimal _valorTotalEstoque;
-
-    private decimal TicketMedioEstoque => _totalProdutos > 0
-        ? _valorTotalEstoque / _totalProdutos
-        : 0;
 
     private string StatusEstoque => _produtosComEstoqueBaixo switch
     {
-        0 => "Sem alertas de reposicao",
+        0 => "Sem alertas no momento",
         1 => "1 produto com estoque baixo",
         _ => $"{_produtosComEstoqueBaixo} produtos com estoque baixo"
     };
 
     private string MensagemOperacional => _totalProdutos switch
     {
-        0 => "Comece cadastrando produtos para acompanhar a operacao por aqui.",
-        _ when _produtosComEstoqueBaixo > 0 => "Existem itens pedindo reposicao. Vale revisar a lista de produtos ainda hoje.",
-        _ when _itensEmEstoque == 0 => "Todos os cadastros estao sem saldo. Registre movimentacoes para refletir o estoque real.",
-        _ => "O estoque esta equilibrado no momento. Mantenha as movimentacoes em dia para preservar essa leitura."
+        0 => "Comece cadastrando os primeiros produtos para usar o painel.",
+        _ when _produtosComEstoqueBaixo > 0 => "Vale revisar a lista de reposicao antes de seguir com a operacao.",
+        _ when _itensEmEstoque == 0 => "Os produtos estao sem saldo. Registre movimentacoes para atualizar o estoque.",
+        _ => "O estoque esta organizado e pronto para acompanhamento."
     };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -310,7 +162,6 @@
 
             _totalProdutos = produtos.Count;
             _itensEmEstoque = produtos.Sum(x => x.QuantidadeEmEstoque);
-            _valorTotalEstoque = produtos.Sum(x => x.Preco * x.QuantidadeEmEstoque);
             _produtosComEstoqueBaixo = produtos.Count(x => x.QuantidadeEmEstoque <= 5);
         }
         catch (Exception ex)
