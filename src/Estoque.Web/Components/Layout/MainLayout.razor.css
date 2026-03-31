@@ -4,6 +4,31 @@
         linear-gradient(180deg, #f8fbff 0%, #f4f6fa 100%);
     min-height: 100vh;
 }
+.app-shell {
+    min-height: 100vh;
+}
+.app-drawer {
+    position: relative;
+    z-index: 2;
+    box-shadow: none;
+}
+.app-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background-color: var(--mud-palette-surface);
+    padding: 0.75rem 1.5rem;
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    box-shadow: 0 2px 12px rgba(23, 33, 51, 0.08);
+}
+.app-topbar button {
+    min-width: 120px;
+}
+.app-content {
+    padding: 1.5rem;
+}
 .app-topbar {
     position: sticky;
     top: 0;
