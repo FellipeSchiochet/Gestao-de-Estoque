@@ -50,7 +50,7 @@
     </MudDrawer>
 
     <MudMainContent>
-        <div class="app-topbar">
+        <div class="@TopbarClass">
             <div class="app-topbar__leading">
                 <MudIconButton Icon="@Icons.Material.Filled.Menu"
                                Color="Color.Inherit"
@@ -85,6 +85,10 @@
 
 @code {
     private bool _drawerOpen = true;
+
+    private string TopbarClass => _drawerOpen
+        ? "app-topbar app-topbar--drawer-open"
+        : "app-topbar";
 
     private readonly MudTheme _theme = new()
     {
