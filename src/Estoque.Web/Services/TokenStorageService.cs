@@ -4,6 +4,7 @@ namespace Estoque.Web.Services;
 
 public class TokenStorageService : ITokenStorageService
 {
+    private const string TokenKey = "authToken";
     private readonly IJSRuntime _jsRuntime;
 
     public TokenStorageService(IJSRuntime jsRuntime)
@@ -13,16 +14,21 @@ public class TokenStorageService : ITokenStorageService
 
     public async Task<string?> ObterTokenAsync()
     {
-        return await _jsRuntime.InvokeAsync<string?>("localStorage.getItem", "authToken");
+        return await _jsRuntime.InvokeAsync<string?>("codexAuth.getToken", TokenKey);
     }
 
     public async Task SalvarTokenAsync(string token)
     {
-        await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "authToken", token);
+        await _jsRuntime.InvokeVoidAsync("codexAuth.saveToken", TokenKey, token);
     }
 
     public async Task RemoverTokenAsync()
     {
-        await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "authToken");
+        await _jsRuntime.InvokeVoidAsync("codexAuth.removeToken", TokenKey);
+    }
+
+    public async Task EncerrarSessaoAsync(string redirectUrl = "/")
+    {
+        await _jsRuntime.InvokeVoidAsync("codexAuth.clearSessionAndRedirect", TokenKey, redirectUrl);
     }
 }

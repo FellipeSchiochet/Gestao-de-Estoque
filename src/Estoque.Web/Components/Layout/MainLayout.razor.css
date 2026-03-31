@@ -1,42 +1,111 @@
 .mud-main-content {
     background:
-        radial-gradient(circle at top left, rgba(21, 101, 192, 0.08), transparent 28%),
-        linear-gradient(180deg, #f8fbff 0%, #f4f6fa 100%);
+        radial-gradient(circle at top left, rgba(15, 61, 117, 0.08), transparent 26%),
+        linear-gradient(180deg, #f7f9fc 0%, #f2f5fb 100%);
     min-height: 100vh;
 }
+
 .app-shell {
     min-height: 100vh;
 }
+
 .app-drawer {
     position: relative;
     z-index: 2;
     box-shadow: none;
 }
+
 .app-topbar {
     position: sticky;
     top: 0;
     z-index: 3;
-    background-color: var(--mud-palette-surface);
-    padding: 0.75rem 1.5rem;
-    align-items: center;
     display: flex;
+    justify-content: space-between;
+    gap: 1.25rem;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 16px 34px rgba(23, 33, 51, 0.08);
+    backdrop-filter: blur(12px);
+}
+
+.app-topbar__leading {
+    display: flex;
+    align-items: center;
     gap: 1rem;
-    box-shadow: 0 2px 12px rgba(23, 33, 51, 0.08);
 }
-.app-topbar button {
-    min-width: 120px;
+
+.app-topbar__menu {
+    border: 1px solid rgba(15, 61, 117, 0.12);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.8);
 }
+
+.app-topbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.app-topbar__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid rgba(15, 61, 117, 0.12);
+    border-radius: 999px;
+    background: rgba(240, 247, 255, 0.9);
+    color: #0f3d75;
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.app-topbar__logout {
+    min-width: 128px;
+    min-height: 46px;
+}
+
 .app-content {
-    padding: 1.5rem;
+    padding: 1.75rem 1.5rem 2rem;
 }
-.app-topbar {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background-color: var(--mud-palette-surface);
-    padding: 0.75rem 1.5rem;
-    align-items: center;
-    display: flex;
-    gap: 1rem;
-    box-shadow: 0 2px 12px rgba(23, 33, 51, 0.08);
+
+@media (max-width: 959.98px) {
+    .app-topbar {
+        padding: 1rem;
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .app-topbar__leading,
+    .app-topbar__actions {
+        width: 100%;
+    }
+
+    .app-topbar__actions {
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .app-content {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 599.98px) {
+    .app-topbar__leading {
+        align-items: flex-start;
+    }
+
+    .app-topbar__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .app-topbar__status {
+        justify-content: center;
+    }
+
+    .app-topbar__logout {
+        width: 100%;
+    }
 }

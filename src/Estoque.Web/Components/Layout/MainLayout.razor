@@ -2,6 +2,7 @@
 @inject ITokenStorageService TokenStorageService
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
+@using Microsoft.JSInterop
 
 <MudThemeProvider Theme="_theme" />
 <MudDialogProvider />
@@ -16,9 +17,10 @@
                Class="app-drawer">
         <div class="app-drawer__brand">
             <div class="app-drawer__logo">EC</div>
-            <div>
+            <div class="app-drawer__brand-copy">
                 <MudText Typo="Typo.subtitle2" Class="app-drawer__eyebrow">Sistema</MudText>
                 <MudText Typo="Typo.h6" Class="app-drawer__title">Estoque Central</MudText>
+                <MudText Typo="Typo.caption" Class="app-drawer__caption">Painel de operacao</MudText>
             </div>
         </div>
 
@@ -43,13 +45,30 @@
 
     <MudMainContent>
         <div class="app-topbar">
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" OnClick="ToggleDrawer" />
-            <div class="app-topbar__titles">
-                <MudText Typo="Typo.subtitle2">Painel operacional</MudText>
-                <MudText Typo="Typo.body2">Controle de estoque e movimentacoes</MudText>
+            <div class="app-topbar__leading">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                               Color="Color.Inherit"
+                               Class="app-topbar__menu"
+                               OnClick="ToggleDrawer" />
+                <div class="app-topbar__titles">
+                    <MudText Typo="Typo.subtitle2">Painel operacional</MudText>
+                    <MudText Typo="Typo.body2">Controle de estoque, produtos e movimentacoes</MudText>
+                </div>
             </div>
-            <MudSpacer />
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SairAsync">Sair</MudButton>
+
+            <div class="app-topbar__actions">
+                <div class="app-topbar__status">
+                    <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" Size="Size.Small" />
+                    <span>Sessao ativa</span>
+                </div>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Logout"
+                           Class="app-topbar__logout"
+                           OnClick="SairAsync">
+                    Sair
+                </MudButton>
+            </div>
         </div>
 
         <MudContainer MaxWidth="MaxWidth.False" Class="app-content">
@@ -96,8 +115,15 @@
 
     private async Task SairAsync()
     {
-        await TokenStorageService.RemoverTokenAsync();
-        Snackbar.Add("Você saiu da sessão.", Severity.Info);
-        NavigationManager.NavigateTo("/login", forceLoad: true);
+        try
+        {
+            await TokenStorageService.EncerrarSessaoAsync("/");
+        }
+        catch (JSException)
+        {
+            await TokenStorageService.RemoverTokenAsync();
+            Snackbar.Add("Voce saiu da sessao.", Severity.Info);
+            NavigationManager.NavigateTo("/", forceLoad: true, replace: true);
+        }
     }
 }
