@@ -59,13 +59,15 @@
 .app-topbar {
     position: sticky;
     top: 0;
-    z-index: 3;
+    left: 0;
+    right: 0;
+    z-index: 5;
     display: flex;
     justify-content: space-between;
     gap: 1.25rem;
     align-items: center;
     padding: 1rem 1.5rem;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.98);
     box-shadow: 0 16px 34px rgba(23, 33, 51, 0.08);
     backdrop-filter: blur(12px);
 }
