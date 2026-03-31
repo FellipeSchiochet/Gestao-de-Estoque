@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
 @inject ITokenStorageService TokenStorageService
 @inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
 
 <MudThemeProvider Theme="_theme" />
 <MudDialogProvider />
@@ -96,6 +97,7 @@
     private async Task SairAsync()
     {
         await TokenStorageService.RemoverTokenAsync();
-        NavigationManager.NavigateTo("/login");
+        Snackbar.Add("Você saiu da sessão.", Severity.Info);
+        NavigationManager.NavigateTo("/login", forceLoad: true);
     }
 }
