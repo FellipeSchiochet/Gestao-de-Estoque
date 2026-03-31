@@ -111,6 +111,13 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapGet("/", () => Results.Ok(new
+{
+    message = "API Estoque rodando com sucesso.",
+    swagger = "/swagger"
+}))
+.AllowAnonymous();
+
 app.MapControllers();
 
 app.Run();
