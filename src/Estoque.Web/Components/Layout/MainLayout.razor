@@ -2,7 +2,6 @@
 @inject ITokenStorageService TokenStorageService
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
-@using Microsoft.JSInterop
 
 <MudThemeProvider Theme="_theme" />
 <MudDialogProvider />
@@ -10,6 +9,33 @@
 <MudSnackbarProvider />
 
 <MudLayout Class="app-shell">
+    <div class="app-topbar">
+        <div class="app-topbar__leading">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                           Color="Color.Inherit"
+                           Class="app-topbar__menu app-topbar__menu--mobile"
+                           OnClick="ToggleDrawerMobile" />
+            <div class="app-topbar__titles">
+                <MudText Typo="Typo.subtitle2">Painel operacional</MudText>
+                <MudText Typo="Typo.body2">Controle de estoque, produtos e movimentacoes</MudText>
+            </div>
+        </div>
+
+        <div class="app-topbar__actions">
+            <div class="app-topbar__status">
+                <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" Size="Size.Small" />
+                <span>Sessao ativa</span>
+            </div>
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Logout"
+                       Class="app-topbar__logout"
+                       OnClick="SairAsync">
+                Sair
+            </MudButton>
+        </div>
+    </div>
+
     <MudDrawer @bind-Open="_drawerOpen"
                Variant="DrawerVariant.Responsive"
                Breakpoint="Breakpoint.Md"
@@ -71,33 +97,6 @@
     </MudDrawer>
 
     <MudMainContent>
-        <div class="@TopbarClass">
-            <div class="app-topbar__leading">
-                <MudIconButton Icon="@Icons.Material.Filled.Menu"
-                               Color="Color.Inherit"
-                               Class="app-topbar__menu app-topbar__menu--mobile"
-                               OnClick="ToggleDrawerMobile" />
-                <div class="app-topbar__titles">
-                    <MudText Typo="Typo.subtitle2">Painel operacional</MudText>
-                    <MudText Typo="Typo.body2">Controle de estoque, produtos e movimentacoes</MudText>
-                </div>
-            </div>
-
-            <div class="app-topbar__actions">
-                <div class="app-topbar__status">
-                    <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" Size="Size.Small" />
-                    <span>Sessao ativa</span>
-                </div>
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.Logout"
-                           Class="app-topbar__logout"
-                           OnClick="SairAsync">
-                    Sair
-                </MudButton>
-            </div>
-        </div>
-
         <MudContainer MaxWidth="MaxWidth.False" Class="app-content">
             @Body
         </MudContainer>
@@ -107,14 +106,11 @@
 @code {
     private bool _drawerOpen = true;
     private bool _drawerMinimized;
+    private bool _saindo;
 
     private string DrawerClass => _drawerMinimized
         ? "app-drawer app-drawer--mini"
         : "app-drawer";
-
-    private string TopbarClass => _drawerMinimized
-        ? "app-topbar app-topbar--drawer-mini"
-        : "app-topbar app-topbar--drawer-open";
 
     private string DrawerToggleIcon => _drawerMinimized
         ? Icons.Material.Filled.KeyboardDoubleArrowRight
@@ -161,15 +157,22 @@
 
     private async Task SairAsync()
     {
-        try
+        if (_saindo)
         {
-            await TokenStorageService.EncerrarSessaoAsync("/");
+            return;
         }
-        catch (JSException)
+
+        _saindo = true;
+
+        try
         {
             await TokenStorageService.RemoverTokenAsync();
             Snackbar.Add("Voce saiu da sessao.", Severity.Info);
             NavigationManager.NavigateTo("/", forceLoad: true, replace: true);
+        }
+        finally
+        {
+            _saindo = false;
         }
     }
 }
