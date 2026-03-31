@@ -2,6 +2,7 @@
 @inject ITokenStorageService TokenStorageService
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
+@using Microsoft.JSInterop
 
 <MudThemeProvider Theme="_theme" />
 <MudDialogProvider />
@@ -13,38 +14,58 @@
                Variant="DrawerVariant.Responsive"
                Breakpoint="Breakpoint.Md"
                Elevation="0"
-               Class="app-drawer">
+               ClipMode="DrawerClipMode.Never"
+               Class="@DrawerClass">
         <div class="app-drawer__brand">
             <div class="app-drawer__brand-main">
                 <div class="app-drawer__logo">EC</div>
-                <div class="app-drawer__brand-copy">
-                    <MudText Typo="Typo.subtitle2" Class="app-drawer__eyebrow">Sistema</MudText>
-                    <MudText Typo="Typo.h6" Class="app-drawer__title">Estoque Central</MudText>
-                    <MudText Typo="Typo.caption" Class="app-drawer__caption">Painel de operacao</MudText>
-                </div>
+
+                @if (!_drawerMinimized)
+                {
+                    <div class="app-drawer__brand-copy">
+                        <MudText Typo="Typo.subtitle2" Class="app-drawer__eyebrow">Sistema</MudText>
+                        <MudText Typo="Typo.h6" Class="app-drawer__title">Estoque Central</MudText>
+                        <MudText Typo="Typo.caption" Class="app-drawer__caption">Painel de operacao</MudText>
+                    </div>
+                }
             </div>
 
-            <MudIconButton Icon="@Icons.Material.Filled.Menu"
+            <MudIconButton Icon="@DrawerToggleIcon"
                            Color="Color.Inherit"
                            Class="app-drawer__toggle"
-                           OnClick="ToggleDrawer" />
+                           OnClick="ToggleDrawerCompact" />
         </div>
 
-            <MudNavMenu Class="app-nav">
-                <MudNavLink Href="/main" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
-                Dashboard
-                </MudNavLink>
+        <MudNavMenu Class="app-nav">
+            <MudNavLink Href="/main" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
+                @if (!_drawerMinimized)
+                {
+                    <span>Dashboard</span>
+                }
+            </MudNavLink>
             <MudNavLink Href="/produtos" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Inventory2">
-                Produtos
+                @if (!_drawerMinimized)
+                {
+                    <span>Produtos</span>
+                }
             </MudNavLink>
             <MudNavLink Href="/produtos/novo" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AddBox">
-                Novo produto
+                @if (!_drawerMinimized)
+                {
+                    <span>Novo produto</span>
+                }
             </MudNavLink>
             <MudNavLink Href="/movimentacoes" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.SwapHoriz">
-                Movimentacoes
+                @if (!_drawerMinimized)
+                {
+                    <span>Movimentacoes</span>
+                }
             </MudNavLink>
             <MudNavLink Href="/movimentacoes/historico" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Timeline">
-                Historico
+                @if (!_drawerMinimized)
+                {
+                    <span>Historico</span>
+                }
             </MudNavLink>
         </MudNavMenu>
     </MudDrawer>
@@ -55,7 +76,7 @@
                 <MudIconButton Icon="@Icons.Material.Filled.Menu"
                                Color="Color.Inherit"
                                Class="app-topbar__menu app-topbar__menu--mobile"
-                               OnClick="ToggleDrawer" />
+                               OnClick="ToggleDrawerMobile" />
                 <div class="app-topbar__titles">
                     <MudText Typo="Typo.subtitle2">Painel operacional</MudText>
                     <MudText Typo="Typo.body2">Controle de estoque, produtos e movimentacoes</MudText>
@@ -85,10 +106,19 @@
 
 @code {
     private bool _drawerOpen = true;
+    private bool _drawerMinimized;
 
-    private string TopbarClass => _drawerOpen
-        ? "app-topbar app-topbar--drawer-open"
-        : "app-topbar";
+    private string DrawerClass => _drawerMinimized
+        ? "app-drawer app-drawer--mini"
+        : "app-drawer";
+
+    private string TopbarClass => _drawerMinimized
+        ? "app-topbar app-topbar--drawer-mini"
+        : "app-topbar app-topbar--drawer-open";
+
+    private string DrawerToggleIcon => _drawerMinimized
+        ? Icons.Material.Filled.KeyboardDoubleArrowRight
+        : Icons.Material.Filled.KeyboardDoubleArrowLeft;
 
     private readonly MudTheme _theme = new()
     {
@@ -118,15 +148,28 @@
         }
     };
 
-    private void ToggleDrawer()
+    private void ToggleDrawerCompact()
+    {
+        _drawerMinimized = !_drawerMinimized;
+        _drawerOpen = true;
+    }
+
+    private void ToggleDrawerMobile()
     {
         _drawerOpen = !_drawerOpen;
     }
 
     private async Task SairAsync()
     {
-        await TokenStorageService.RemoverTokenAsync();
-        Snackbar.Add("Você saiu da sessão.", Severity.Info);
-        NavigationManager.NavigateTo("/login", forceLoad: true);
+        try
+        {
+            await TokenStorageService.EncerrarSessaoAsync("/");
+        }
+        catch (JSException)
+        {
+            await TokenStorageService.RemoverTokenAsync();
+            Snackbar.Add("Voce saiu da sessao.", Severity.Info);
+            NavigationManager.NavigateTo("/", forceLoad: true, replace: true);
+        }
     }
 }
