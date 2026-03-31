@@ -15,7 +15,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Logging.AddFilter<EventLogLoggerProvider>(level => level >= LogLevel.None);
+if (OperatingSystem.IsWindows())
+{
+    builder.Logging.AddFilter<EventLogLoggerProvider>(level => level >= LogLevel.None);
+}
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -100,7 +103,10 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();

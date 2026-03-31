@@ -2,6 +2,7 @@
 @inject ITokenStorageService TokenStorageService
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
+@using Microsoft.JSInterop
 
 <MudThemeProvider Theme="_theme" />
 <MudDialogProvider />
@@ -166,8 +167,11 @@
 
         try
         {
+            await TokenStorageService.EncerrarSessaoAsync("/");
+        }
+        catch (JSException)
+        {
             await TokenStorageService.RemoverTokenAsync();
-            Snackbar.Add("Voce saiu da sessao.", Severity.Info);
             NavigationManager.NavigateTo("/", forceLoad: true, replace: true);
         }
         finally

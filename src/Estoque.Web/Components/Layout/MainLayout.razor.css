@@ -88,6 +88,11 @@
     overflow-x: hidden;
 }
 
+.app-drawer .mud-paper {
+    top: var(--app-topbar-height) !important;
+    height: calc(100vh - var(--app-topbar-height)) !important;
+}
+
 .app-drawer--mini {
     width: var(--app-drawer-mini-width) !important;
     min-width: var(--app-drawer-mini-width) !important;
@@ -174,6 +179,11 @@
     display: none;
 }
 
+.app-drawer--mini .app-drawer__toggle {
+    margin-inline-start: auto;
+    margin-inline-end: auto;
+}
+
 .app-content {
     padding: calc(var(--app-topbar-height) + 1.5rem) 1.5rem 2rem;
 }
@@ -207,6 +217,11 @@
         width: min(310px, 86vw) !important;
         min-width: min(310px, 86vw) !important;
         max-width: min(310px, 86vw) !important;
+    }
+
+    .app-drawer .mud-paper {
+        top: var(--app-topbar-height) !important;
+        height: calc(100vh - var(--app-topbar-height)) !important;
     }
 
     .app-topbar {

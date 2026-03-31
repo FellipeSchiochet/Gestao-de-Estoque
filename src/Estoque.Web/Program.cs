@@ -5,7 +5,10 @@ using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Logging.AddFilter<EventLogLoggerProvider>(level => level >= LogLevel.None);
+if (OperatingSystem.IsWindows())
+{
+    builder.Logging.AddFilter<EventLogLoggerProvider>(level => level >= LogLevel.None);
+}
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -39,7 +42,12 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseStatusCodePagesWithReExecute("/not-found");
-app.UseHttpsRedirection();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseStaticFiles();
 app.UseAntiforgery();
 
