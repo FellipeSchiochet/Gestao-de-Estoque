@@ -2,6 +2,11 @@
 
 Projeto composto por uma API ASP.NET Core + front-end MudBlazor. A API expõe produtos e movimentações, enquanto o cliente consome os endpoints protegidos por JWT.
 
+## Links de acesso
+
+- Front-end: `https://gestao-de-estoque-1.onrender.com`
+- API: `https://gestao-de-estoque-qpyp.onrender.com`
+
 ## Requisitos
 
 - .NET 8 SDK instalado (para desenvolvimento use `dotnet --list-sdks` e, se necessário, o script `scripts/install-dotnet.sh` em sistemas Unix).
@@ -23,7 +28,7 @@ A API não deve armazenar segredos no `appsettings.json`. Defina os valores obri
 
 ## Variáveis de ambiente (front-end)
 
-A aplicação Blazor roda em Vercel e faz chamadas HTTP para a API. Configure:
+A aplicação Blazor roda no Render e faz chamadas HTTP para a API. Configure:
 
 - `Api__BaseUrl`: URL pública da API hospedada no Render (ex.: `https://minha-api.onrender.com/`). Em local, o `appsettings.json` já aponta para `http://localhost:5020/`, mas o valor deve ser sobrescrito no ambiente de produção.
 
@@ -45,6 +50,6 @@ A aplicação Blazor roda em Vercel e faz chamadas HTTP para a API. Configure:
 ## Deploy
 
 - No Render (API), configure as variáveis acima e ative `DOTNET_ENVIRONMENT=Production`.
-- No Vercel (front-end), defina `Api__BaseUrl` com a URL da API deployada.
+- No Render (front-end), defina `Api__BaseUrl` com a URL da API deployada.
 
 Com esses ajustes, o projeto não depende de segredos versionados e funciona em ambientes locais e cloud.
