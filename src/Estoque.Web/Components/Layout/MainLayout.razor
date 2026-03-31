@@ -2,7 +2,6 @@
 @inject ITokenStorageService TokenStorageService
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
-@using Microsoft.JSInterop
 
 <MudThemeProvider Theme="_theme" />
 <MudDialogProvider />
@@ -31,10 +30,10 @@
                            OnClick="ToggleDrawer" />
         </div>
 
-        <MudNavMenu Class="app-nav">
-            <MudNavLink Href="/main" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
-                Main
-            </MudNavLink>
+            <MudNavMenu Class="app-nav">
+                <MudNavLink Href="/main" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
+                Dashboard
+                </MudNavLink>
             <MudNavLink Href="/produtos" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Inventory2">
                 Produtos
             </MudNavLink>
@@ -122,15 +121,8 @@
 
     private async Task SairAsync()
     {
-        try
-        {
-            await TokenStorageService.EncerrarSessaoAsync("/");
-        }
-        catch (JSException)
-        {
-            await TokenStorageService.RemoverTokenAsync();
-            Snackbar.Add("Voce saiu da sessao.", Severity.Info);
-            NavigationManager.NavigateTo("/", forceLoad: true, replace: true);
-        }
+        await TokenStorageService.RemoverTokenAsync();
+        Snackbar.Add("Você saiu da sessão.", Severity.Info);
+        NavigationManager.NavigateTo("/login", forceLoad: true);
     }
 }
