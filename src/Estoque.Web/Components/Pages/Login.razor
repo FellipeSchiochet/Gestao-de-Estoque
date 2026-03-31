@@ -1,4 +1,5 @@
 @page "/login"
+@page "/"
 @layout AuthLayout
 @rendermode InteractiveServer
 @inject IAuthApiService AuthApiService
@@ -171,6 +172,15 @@
     private readonly RegisterFormModel _registerModel = new();
     private bool _modoCadastro;
     private bool _processando;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await TokenStorageService.ObterTokenAsync();
+        if (!string.IsNullOrWhiteSpace(token))
+        {
+            NavigationManager.NavigateTo("/main");
+        }
+    }
 
     private void AlternarModo(bool cadastro)
     {
