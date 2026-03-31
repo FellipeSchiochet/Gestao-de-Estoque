@@ -172,10 +172,18 @@
     private readonly RegisterFormModel _registerModel = new();
     private bool _modoCadastro;
     private bool _processando;
+    private bool _verificouToken;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!firstRender || _verificouToken)
+        {
+            return;
+        }
+
+        _verificouToken = true;
         var token = await TokenStorageService.ObterTokenAsync();
+
         if (!string.IsNullOrWhiteSpace(token))
         {
             NavigationManager.NavigateTo("/main");
