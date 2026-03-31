@@ -76,7 +76,7 @@
 }
 
 .app-topbar--drawer-open {
-    left: var(--app-drawer-width);
+    padding-left: calc(var(--app-drawer-width) + 1.5rem);
 }
 
 .app-topbar__leading {
@@ -134,6 +134,7 @@
     .app-topbar {
         left: 0;
         right: 0;
+        padding-left: 1rem;
         padding: 1rem;
         align-items: stretch;
         flex-direction: column;
