@@ -9,3 +9,4 @@ src/*/obj/
 *.user
 *.DS_Store
 thumbs.db
+out/
