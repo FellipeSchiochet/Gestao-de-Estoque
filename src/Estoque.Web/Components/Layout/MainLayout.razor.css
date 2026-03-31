@@ -15,6 +15,27 @@
     box-shadow: none;
 }
 
+.app-drawer__brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.app-drawer__brand-main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.app-drawer__toggle,
+.app-topbar__menu {
+    border: 1px solid rgba(15, 61, 117, 0.12);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.8);
+}
+
 .app-topbar {
     position: sticky;
     top: 0;
@@ -35,10 +56,8 @@
     gap: 1rem;
 }
 
-.app-topbar__menu {
-    border: 1px solid rgba(15, 61, 117, 0.12);
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.8);
+.app-topbar__menu--mobile {
+    display: none;
 }
 
 .app-topbar__actions {
@@ -70,6 +89,14 @@
 }
 
 @media (max-width: 959.98px) {
+    .app-drawer__toggle {
+        display: none;
+    }
+
+    .app-topbar__menu--mobile {
+        display: inline-flex;
+    }
+
     .app-topbar {
         padding: 1rem;
         align-items: stretch;
