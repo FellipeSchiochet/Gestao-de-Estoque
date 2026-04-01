@@ -1,6 +1,5 @@
 @page "/produtos/novo"
 @page "/produtos/editar/{Id:int}"
-@rendermode InteractiveServer
 @inject IProdutoApiService ProdutoApiService
 @inject ITokenStorageService TokenStorageService
 @inject ISnackbar Snackbar
@@ -30,7 +29,7 @@
         }
         else
         {
-            <EditForm Model="_formModel" OnValidSubmit="SalvarAsync">
+            <EditForm Model="_formModel" OnValidSubmit="SalvarAsync" FormName="produto-form">
                 <DataAnnotationsValidator />
 
                 <MudGrid Spacing="3">

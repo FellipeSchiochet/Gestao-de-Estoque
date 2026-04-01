@@ -1,7 +1,6 @@
 @page "/login"
 @page "/"
 @layout AuthLayout
-@rendermode InteractiveServer
 @inject IAuthApiService AuthApiService
 @inject ITokenStorageService TokenStorageService
 @inject ISnackbar Snackbar
@@ -69,7 +68,7 @@
 
                 @if (_modoCadastro)
                 {
-                    <EditForm Model="_registerModel" OnValidSubmit="CadastrarAsync">
+                    <EditForm Model="_registerModel" OnValidSubmit="CadastrarAsync" FormName="register-form">
                         <DataAnnotationsValidator />
 
                         <MudStack Spacing="2" Class="mt-6">
@@ -126,7 +125,7 @@
                 }
                 else
                 {
-                    <EditForm Model="_loginModel" OnValidSubmit="EntrarAsync">
+                    <EditForm Model="_loginModel" OnValidSubmit="EntrarAsync" FormName="login-form">
                         <DataAnnotationsValidator />
 
                         <MudStack Spacing="2" Class="mt-6">
@@ -172,6 +171,25 @@
     private readonly RegisterFormModel _registerModel = new();
     private bool _modoCadastro;
     private bool _processando;
+    private bool _verificouToken;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _verificouToken)
+        {
+            return;
+        }
+
+        _verificouToken = true;
+        await TokenStorageService.RemoverTokenAsync();
+
+        var uri = new Uri(NavigationManager.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        if (query["loggedout"] == "true")
+        {
+            Snackbar.Add("Você saiu da sua conta com sucesso.", Severity.Info);
+        }
+    }
 
     private void AlternarModo(bool cadastro)
     {

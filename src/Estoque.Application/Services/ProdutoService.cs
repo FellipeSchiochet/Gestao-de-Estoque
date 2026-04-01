@@ -2,16 +2,19 @@ using Estoque.Application.DTOs.Produto;
 using Estoque.Application.Interfaces.Repositories;
 using Estoque.Application.Interfaces.Services;
 using Estoque.Domain.Entities;
+using Estoque.Domain.Enums;
 
 namespace Estoque.Application.Services;
 
 public class ProdutoService : IProdutoService
 {
     private readonly IProdutoRepository _produtoRepository;
+    private readonly IMovimentacaoEstoqueRepository _movimentacaoRepository;
 
-    public ProdutoService(IProdutoRepository produtoRepository)
+    public ProdutoService(IProdutoRepository produtoRepository, IMovimentacaoEstoqueRepository movimentacaoRepository)
     {
         _produtoRepository = produtoRepository;
+        _movimentacaoRepository = movimentacaoRepository;
     }
 
     public async Task<IReadOnlyList<ProdutoResponse>> ObterTodosAsync(CancellationToken cancellationToken = default)
@@ -40,6 +43,18 @@ public class ProdutoService : IProdutoService
 
         await _produtoRepository.AdicionarAsync(produto, cancellationToken);
         await _produtoRepository.SalvarAlteracoesAsync(cancellationToken);
+
+        if (request.QuantidadeEmEstoque > 0)
+        {
+            var movimentacao = new MovimentacaoEstoque(
+                produto.Id,
+                TipoMovimentacaoEstoque.Entrada,
+                request.QuantidadeEmEstoque,
+                observacao: "Quantidade inicial");
+
+            await _movimentacaoRepository.AdicionarAsync(movimentacao, cancellationToken);
+            await _movimentacaoRepository.SalvarAlteracoesAsync(cancellationToken);
+        }
 
         return MapearParaResponse(produto);
     }
