@@ -40,6 +40,14 @@ public class MovimentacoesEstoqueController : ControllerBase
         }
     }
 
+    [HttpGet]
+    [ProducesResponseType(typeof(IReadOnlyList<MovimentacaoEstoqueResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<MovimentacaoEstoqueResponse>>> GetAll(CancellationToken cancellationToken)
+    {
+        var historico = await _movimentacaoService.ObterTodosAsync(cancellationToken);
+        return Ok(historico);
+    }
+
     [HttpGet("produto/{produtoId:int}")]
     [ProducesResponseType(typeof(IReadOnlyList<MovimentacaoEstoqueResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

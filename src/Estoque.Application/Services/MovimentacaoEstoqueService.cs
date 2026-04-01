@@ -41,6 +41,31 @@ public class MovimentacaoEstoqueService : IMovimentacaoEstoqueService
         return MapearParaResponse(movimentacao, produto);
     }
 
+    public async Task<IReadOnlyList<MovimentacaoEstoqueResponse>> ObterTodosAsync(CancellationToken cancellationToken = default)
+    {
+        var movimentacoes = await _movimentacaoRepository.ObterTodosAsync(cancellationToken);
+        var produtos = await _produtoRepository.ObterTodosAsync(cancellationToken);
+        var produtosDict = produtos.ToDictionary(p => p.Id);
+
+        return movimentacoes
+            .Select(m =>
+            {
+                produtosDict.TryGetValue(m.ProdutoId, out var produto);
+                return new MovimentacaoEstoqueResponse
+                {
+                    Id = m.Id,
+                    ProdutoId = m.ProdutoId,
+                    ProdutoNome = produto?.Nome ?? "Produto removido",
+                    Tipo = m.Tipo,
+                    Quantidade = m.Quantidade,
+                    Data = m.Data,
+                    Observacao = m.Observacao,
+                    EstoqueAtual = produto?.QuantidadeEmEstoque ?? 0
+                };
+            })
+            .ToList();
+    }
+
     public async Task<IReadOnlyList<MovimentacaoEstoqueResponse>> ObterHistoricoPorProdutoAsync(
         int produtoId,
         CancellationToken cancellationToken = default)

@@ -12,7 +12,7 @@
         <div>
             <MudText Typo="Typo.h4">Historico de movimentacoes</MudText>
             <MudText Typo="Typo.body2" Class="page-header__subtext">
-                Tela dedicada para consulta do historico por produto.
+                Consulte todas as movimentacoes ou filtre por produto.
             </MudText>
         </div>
         <MudButton Variant="Variant.Outlined"
@@ -25,10 +25,11 @@
     <MudPaper Class="panel">
         <div class="table-toolbar">
             <MudSelect T="int"
-                       Label="Produto"
+                       Label="Filtrar por produto (opcional)"
                        Variant="Variant.Outlined"
                        Margin="Margin.Dense"
                        @bind-Value="_produtoIdSelecionado"
+                       Clearable="true"
                        Class="table-toolbar__search">
                 @foreach (var produto in _produtos)
                 {
@@ -38,9 +39,9 @@
 
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Default"
-                       OnClick="CarregarHistoricoAsync"
-                       Disabled="@(_produtoIdSelecionado <= 0 || _carregandoHistorico)">
-                Atualizar
+                       OnClick="PesquisarAsync"
+                       Disabled="@_carregandoHistorico">
+                Pesquisar
             </MudButton>
         </div>
 
@@ -54,6 +55,10 @@
                      Class="clean-grid">
             <Columns>
                 <PropertyColumn Property="x => x.Data" Title="Data" Format="dd/MM/yyyy HH:mm" />
+                @if (_produtoIdSelecionado <= 0)
+                {
+                    <PropertyColumn Property="x => x.ProdutoNome" Title="Produto" />
+                }
                 <TemplateColumn Title="Tipo">
                     <CellTemplate>
                         <MudChip T="string"
@@ -66,7 +71,10 @@
                     </CellTemplate>
                 </TemplateColumn>
                 <PropertyColumn Property="x => x.Quantidade" Title="Quantidade" />
-                <PropertyColumn Property="x => x.EstoqueAtual" Title="Saldo apos" />
+                @if (_produtoIdSelecionado > 0)
+                {
+                    <PropertyColumn Property="x => x.EstoqueAtual" Title="Saldo apos" />
+                }
                 <PropertyColumn Property="x => x.Observacao" Title="Observacao" />
             </Columns>
             <PagerContent>
@@ -76,7 +84,7 @@
                 <div class="empty-state">
                     <MudIcon Icon="@Icons.Material.Filled.Timeline" Size="Size.Large" />
                     <MudText Typo="Typo.h6">Nenhuma movimentacao encontrada</MudText>
-                    <MudText Typo="Typo.body2">Selecione um produto para consultar o historico.</MudText>
+                    <MudText Typo="Typo.body2">Nenhuma movimentacao registrada ainda.</MudText>
                 </div>
             </NoRecordsContent>
         </MudDataGrid>
@@ -118,28 +126,26 @@
         _produtos = await ProdutoApiService.ObterTodosAsync(token);
         _produtoIdSelecionado = ProdutoId ?? 0;
 
-        if (_produtoIdSelecionado > 0)
-        {
-            await CarregarHistoricoAsync();
-        }
+        await CarregarHistoricoAsync(token);
 
         StateHasChanged();
     }
 
-    private async Task CarregarHistoricoAsync()
+    private async Task PesquisarAsync()
     {
-        if (_produtoIdSelecionado <= 0)
-        {
-            _historico = [];
-            return;
-        }
+        var token = await TokenStorageService.ObterTokenAsync();
+        await CarregarHistoricoAsync(token);
+    }
 
+    private async Task CarregarHistoricoAsync(string? token)
+    {
         _carregandoHistorico = true;
 
         try
         {
-            var token = await TokenStorageService.ObterTokenAsync();
-            _historico = await MovimentacaoApiService.ObterHistoricoAsync(token, _produtoIdSelecionado);
+            _historico = _produtoIdSelecionado > 0
+                ? await MovimentacaoApiService.ObterHistoricoAsync(token, _produtoIdSelecionado)
+                : await MovimentacaoApiService.ObterTodosAsync(token);
         }
         catch (Exception ex)
         {
@@ -149,6 +155,7 @@
         finally
         {
             _carregandoHistorico = false;
+            StateHasChanged();
         }
     }
 }
