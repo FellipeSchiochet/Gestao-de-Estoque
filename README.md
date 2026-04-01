@@ -42,7 +42,18 @@ A aplicação Blazor roda em Vercel e faz chamadas HTTP para a API. Configure:
 2. (Opcional) Defina `Api__BaseUrl` para o endereço local da API se quiser testar o frontend (`http://localhost:7048/`).
 3. Execute `dotnet build Estoque.sln` e, depois, `dotnet run` nos projetos `Estoque.API` e `Estoque.Web` conforme necessário.
 
+## Ambientes
+
+| Ambiente | URL |
+|----------|-----|
+| Produção | https://gestao-de-estoque-1.onrender.com |
+| Dev | https://gestao-de-estoque-dev-2.onrender.com |
+
 ## Deploy
+
+Commits na branch `production` disparam deploy automático em produção via GitHub Actions.
+
+Commits na branch `dev` disparam deploy automático em dev via GitHub Actions.
 
 - No Render (API), configure as variáveis acima e ative `DOTNET_ENVIRONMENT=Production`.
 - No Vercel (front-end), defina `Api__BaseUrl` com a URL da API deployada.
