@@ -8,14 +8,14 @@
 <MudSnackbarProvider />
 
 <MudLayout Class="app-shell">
-    <MudDrawer @bind-Open="_drawerOpen"
-               Variant="DrawerVariant.Mini"
+    <MudDrawer Open="true"
+               Variant="DrawerVariant.Responsive"
                Elevation="0"
-               Class="app-drawer">
+               Class="@($"app-drawer {(_isMini ? "app-drawer--mini" : "")}")">
         <div class="app-drawer__inner">
             <div class="app-drawer__brand">
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" OnClick="ToggleDrawer" />
-                @if (_drawerOpen)
+                @if (!_isMini)
                 {
                     <div class="app-drawer__logo">EC</div>
                     <MudText Typo="Typo.subtitle1" Class="app-drawer__title">Gestão de Estoque</MudText>
@@ -24,26 +24,26 @@
 
             <MudNavMenu Class="app-nav">
                 <MudNavLink Href="/main" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
-                    @if (_drawerOpen) { <span>Dashboard</span> }
+                    @if (!_isMini) { <span>Dashboard</span> }
                 </MudNavLink>
                 <MudNavLink Href="/produtos" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Inventory2">
-                    @if (_drawerOpen) { <span>Produtos</span> }
+                    @if (!_isMini) { <span>Produtos</span> }
                 </MudNavLink>
                 <MudNavLink Href="/produtos/novo" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AddBox">
-                    @if (_drawerOpen) { <span>Novo produto</span> }
+                    @if (!_isMini) { <span>Novo produto</span> }
                 </MudNavLink>
                 <MudNavLink Href="/movimentacoes" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.SwapHoriz">
-                    @if (_drawerOpen) { <span>Movimentacoes</span> }
+                    @if (!_isMini) { <span>Movimentacoes</span> }
                 </MudNavLink>
                 <MudNavLink Href="/movimentacoes/historico" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Timeline">
-                    @if (_drawerOpen) { <span>Historico</span> }
+                    @if (!_isMini) { <span>Historico</span> }
                 </MudNavLink>
             </MudNavMenu>
 
             <div class="app-drawer__spacer"></div>
 
             <div class="app-drawer__footer">
-                @if (_drawerOpen)
+                @if (!_isMini)
                 {
                     <MudButton FullWidth="true" Variant="Variant.Filled" Color="Color.Primary" OnClick="SairAsync"
                                StartIcon="@Icons.Material.Filled.Logout">
@@ -66,7 +66,7 @@
 </MudLayout>
 
 @code {
-    private bool _drawerOpen = true;
+    private bool _isMini = false;
 
     private readonly MudTheme _theme = new()
     {
@@ -98,7 +98,7 @@
 
     private void ToggleDrawer()
     {
-        _drawerOpen = !_drawerOpen;
+        _isMini = !_isMini;
     }
 
     private async Task SairAsync()

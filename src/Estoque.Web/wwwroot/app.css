@@ -40,10 +40,49 @@ a {
 
 .app-drawer {
     border-right: 1px solid var(--line);
+    transition: width 0.2s ease;
 }
 
 .app-drawer .mud-drawer-content {
     background: var(--surface);
+    overflow: hidden;
+}
+
+.app-drawer--mini {
+    width: 68px !important;
+    min-width: 68px !important;
+}
+
+.app-drawer--mini .mud-drawer-content {
+    width: 68px !important;
+    min-width: 68px !important;
+}
+
+.app-drawer--mini .app-drawer__inner {
+    align-items: center;
+}
+
+.app-drawer--mini .app-drawer__brand {
+    justify-content: center;
+    padding: 20px 0;
+}
+
+.app-drawer--mini .app-nav {
+    padding: 16px 6px;
+}
+
+.app-drawer--mini .app-nav .mud-nav-link {
+    justify-content: center;
+    padding: 0;
+    min-width: 44px;
+    width: 44px;
+    margin: 0 auto 4px;
+}
+
+.app-drawer--mini .app-drawer__footer {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 12px;
 }
 
 .app-drawer__brand {
