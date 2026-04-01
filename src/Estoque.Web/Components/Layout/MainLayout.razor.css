@@ -4,3 +4,45 @@
         linear-gradient(180deg, #f8fbff 0%, #f4f6fa 100%);
     min-height: 100vh;
 }
+
+
+/* Wrapper flex dentro do drawer — não interfere no mecanismo interno do MudBlazor */
+.app-drawer__inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-right: 1px solid #E6EBF2;
+}
+
+.app-drawer__brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 8px 8px 4px;
+    border-bottom: 1px solid #E6EBF2;
+}
+
+.app-drawer__logo {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.app-drawer__title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+}
+
+.app-drawer__spacer {
+    flex: 1;
+}
+
+.app-drawer__footer {
+    padding: 16px;
+    border-top: 1px solid #E6EBF2;
+}
+
+.app-content {
+    padding: 24px 16px;
+}

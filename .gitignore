@@ -8,5 +8,6 @@ src/*/obj/
 .vs/
 *.user
 *.DS_Store
+appsettings.Development.json
 thumbs.db
 out/

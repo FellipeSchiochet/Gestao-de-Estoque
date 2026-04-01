@@ -1,5 +1,4 @@
 @page "/movimentacoes"
-@rendermode InteractiveServer
 @inject IProdutoApiService ProdutoApiService
 @inject IMovimentacaoApiService MovimentacaoApiService
 @inject ITokenStorageService TokenStorageService
@@ -24,7 +23,7 @@
     </div>
 
     <MudPaper Class="panel form-panel">
-        <EditForm Model="_formModel" OnValidSubmit="RegistrarAsync">
+        <EditForm Model="_formModel" OnValidSubmit="RegistrarAsync" FormName="movimentacao-form">
             <DataAnnotationsValidator />
 
             <MudGrid Spacing="3">
@@ -59,7 +58,8 @@
                                      Variant="Variant.Outlined"
                                      Margin="Margin.Dense"
                                      Min="1"
-                                     Immediate="true" />
+                                     Immediate="true"
+                                     For="@(() => _formModel.Quantidade)" />
                 </MudItem>
 
                 <MudItem xs="12">
@@ -97,7 +97,7 @@
     public int? ProdutoId { get; set; }
 
     private IReadOnlyList<ProdutoViewModel> _produtos = [];
-    private MovimentacaoFormModel _formModel = new();
+    private MovimentacaoFormModel _formModel = new() { Quantidade = 1 };
     private bool _carregadoInicialmente;
     private bool _salvando;
 
@@ -162,7 +162,8 @@
     {
         _formModel = new MovimentacaoFormModel
         {
-            Tipo = TipoMovimentacaoEstoqueViewModel.Entrada
+            Tipo = TipoMovimentacaoEstoqueViewModel.Entrada,
+            Quantidade = 1
         };
     }
 }
