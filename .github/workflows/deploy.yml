@@ -1,0 +1,28 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - dev
+      - production
+
+jobs:
+  deploy-dev:
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy API Dev
+        run: curl -s "${{ secrets.RENDER_API_DEV }}"
+
+      - name: Deploy Frontend Dev
+        run: curl -s "${{ secrets.RENDER_FRONT_DEV }}"
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/production'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy API Prod
+        run: curl -s "${{ secrets.RENDER_API_PROD }}"
+
+      - name: Deploy Frontend Prod
+        run: curl -s "${{ secrets.RENDER_FRONT_PROD }}"
