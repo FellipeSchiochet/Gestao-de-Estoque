@@ -50,7 +50,7 @@ public class ProdutoService : IProdutoService
                 produto.Id,
                 TipoMovimentacaoEstoque.Entrada,
                 request.QuantidadeEmEstoque,
-                observacao: "Quantidade inicial");
+                observacao: "Estoque inicial");
 
             await _movimentacaoRepository.AdicionarAsync(movimentacao, cancellationToken);
             await _movimentacaoRepository.SalvarAlteracoesAsync(cancellationToken);

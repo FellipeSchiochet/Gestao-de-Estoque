@@ -28,6 +28,18 @@ public class MovimentacaoApiService : IMovimentacaoApiService
             ?? throw new InvalidOperationException("A API não retornou a movimentação registrada.");
     }
 
+    public async Task<IReadOnlyList<MovimentacaoViewModel>> ObterTodosAsync(string? token, CancellationToken cancellationToken = default)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, "api/movimentacoesestoque");
+        AdicionarToken(request, token);
+
+        using var response = await _httpClient.SendAsync(request, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var historico = await response.Content.ReadFromJsonAsync<List<MovimentacaoViewModel>>(cancellationToken: cancellationToken);
+        return historico ?? [];
+    }
+
     public async Task<IReadOnlyList<MovimentacaoViewModel>> ObterHistoricoAsync(string? token, int produtoId, CancellationToken cancellationToken = default)
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, $"api/movimentacoesestoque/produto/{produtoId}");

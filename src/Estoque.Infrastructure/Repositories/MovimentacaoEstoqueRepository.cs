@@ -19,6 +19,15 @@ public class MovimentacaoEstoqueRepository : IMovimentacaoEstoqueRepository
         await _context.MovimentacoesEstoque.AddAsync(movimentacao, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<MovimentacaoEstoque>> ObterTodosAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.MovimentacoesEstoque
+            .AsNoTracking()
+            .OrderByDescending(m => m.Data)
+            .ThenByDescending(m => m.Id)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<MovimentacaoEstoque>> ObterPorProdutoIdAsync(int produtoId, CancellationToken cancellationToken = default)
     {
         return await _context.MovimentacoesEstoque
